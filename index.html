@@ -3,559 +3,333 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mr. White Ultimate P2P</title>
+    <title>Mr. White Fixed</title>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
-        :root { 
-            --primary: #00e676; 
-            --secondary: #2979ff;
-            --danger: #ff5252;
-            --bg: #121212; 
-            --surface: #1e1e1e; 
-            --text: #ffffff; 
-        }
-        body { font-family: 'Segoe UI', Roboto, Helvetica, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; text-align: center; }
-        .container { max-width: 500px; margin: 0 auto; padding-bottom: 50px;}
-        
-        .card { background: var(--surface); padding: 20px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.4); margin-bottom: 20px; border: 1px solid #333; position: relative; overflow: hidden; }
-        
-        h1, h2, h3 { margin-top: 0; font-weight: 700; }
+        :root { --primary: #00e676; --secondary: #2979ff; --danger: #ff5252; --bg: #121212; --surface: #1e1e1e; --text: #ffffff; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; text-align: center; padding-bottom: 60px; }
+        .card { background: var(--surface); padding: 20px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.4); margin-bottom: 20px; border: 1px solid #333; }
+        h1, h2 { margin-top: 0; }
         .accent { color: var(--primary); }
         .white-role { color: var(--danger); }
         .under-role { color: var(--secondary); }
-        
         input { box-sizing: border-box; width: 100%; padding: 15px; margin: 8px 0; background: #2c2c2c; border: 1px solid #444; color: white; border-radius: 10px; font-size: 18px; text-align: center; }
-        input:focus { outline: none; border-color: var(--primary); }
-        
-        button { width: 100%; padding: 16px; margin-top: 10px; border-radius: 10px; border: none; font-size: 18px; font-weight: bold; cursor: pointer; transition: transform 0.1s; }
-        button:active { transform: scale(0.98); }
+        button { width: 100%; padding: 16px; margin-top: 10px; border-radius: 10px; border: none; font-size: 18px; font-weight: bold; cursor: pointer; }
         .btn-host { background: var(--primary); color: #000; }
         .btn-join { background: var(--secondary); color: white; }
         .btn-vote { background: #333; border: 1px solid #555; color: white; margin-bottom: 8px; text-align: left; padding: 12px; display: flex; justify-content: space-between; align-items: center; }
-        .btn-vote:hover { border-color: var(--primary); background: #252525; }
-        
         .hidden { display: none !important; }
-        
-        /* Status Bar (Alive/Dead) */
-        .status-bar { padding: 8px; border-radius: 8px; margin-bottom: 15px; font-weight: bold; text-transform: uppercase; font-size: 0.9rem; letter-spacing: 1px; }
+        .status-bar { padding: 8px; border-radius: 8px; margin-bottom: 15px; font-weight: bold; text-transform: uppercase; font-size: 0.9rem; }
         .st-alive { background: rgba(0, 230, 118, 0.2); color: var(--primary); border: 1px solid var(--primary); }
         .st-dead { background: rgba(255, 82, 82, 0.2); color: var(--danger); border: 1px solid var(--danger); }
-
-        /* Contatori Host */
         .counter-box { display: flex; justify-content: space-between; align-items: center; background: #2c2c2c; padding: 10px; border-radius: 8px; margin-bottom: 10px; }
         .counter-btn { width: 40px; height: 40px; margin: 0; padding: 0; font-size: 24px; line-height: 1; }
-        .count-display { font-size: 20px; font-weight: bold; width: 30px; }
-
         .big-word { font-size: 2.2rem; font-weight: 800; color: var(--primary); margin: 20px 0; padding: 20px; border: 2px dashed #444; border-radius: 10px; background: #1a1a1a; word-break: break-word;}
-        
-        /* Risultato Personale */
         .win-banner { background: var(--primary); color: black; padding: 20px; margin: -20px -20px 20px -20px; }
         .lose-banner { background: var(--danger); color: white; padding: 20px; margin: -20px -20px 20px -20px; }
-
-        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 12px 24px; border-radius: 30px; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 100; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
-        
+        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 12px 24px; border-radius: 30px; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 100; }
         .player-list li { background: #252525; margin: 5px 0; padding: 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #444; }
         .player-list li.me { border-left-color: var(--primary); }
-        
         .dead-player { text-decoration: line-through; opacity: 0.5; }
     </style>
 </head>
 <body>
 
-<div class="container">
+<div class="container" style="max-width: 500px; margin: 0 auto;">
     <h1>🕵️ Secret Roles</h1>
 
     <div id="view-login" class="card">
         <h3>Chi sei?</h3>
         <input type="text" id="nickname" placeholder="Il tuo nome">
-        <input type="text" id="roomName" placeholder="Nome Stanza (es. CIAO)">
-        
+        <input type="text" id="roomName" placeholder="Nome Stanza (es. ROMA)">
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
             <button onclick="initHost()" class="btn-host">Crea</button>
             <button onclick="initJoin()" class="btn-join">Entra</button>
         </div>
-        <p id="connStatus" style="color: #888; margin-top: 15px; font-size: 0.9em;"></p>
+        <p id="connStatus" style="color:#888; font-size:0.9em; margin-top:10px;"></p>
     </div>
 
     <div id="view-lobby" class="card hidden">
         <h2>Stanza: <span id="lobbyRoomName" class="accent"></span></h2>
-        
-        <div id="hostConfig" class="hidden" style="border-top: 1px solid #333; border-bottom: 1px solid #333; padding: 10px 0; margin: 15px 0;">
-            <h4 style="margin: 0 0 10px 0;">Configurazione Nemici</h4>
+        <div id="hostConfig" class="hidden" style="margin: 15px 0;">
             <div class="counter-box">
-                <span>🕵️ Undercover (Spia)</span>
-                <div style="display:flex; align-items:center; gap:10px;">
-                    <button class="counter-btn" onclick="adjustRole('undercover', -1)">-</button>
-                    <span id="count-undercover" class="count-display">1</span>
-                    <button class="counter-btn" onclick="adjustRole('undercover', 1)">+</button>
-                </div>
+                <span>🕵️ Undercover</span>
+                <div style="display:flex; gap:10px;"><button class="counter-btn" onclick="adjustRole('undercover', -1)">-</button><span id="count-undercover" style="font-size:20px; font-weight:bold; width:30px;">1</span><button class="counter-btn" onclick="adjustRole('undercover', 1)">+</button></div>
             </div>
             <div class="counter-box">
-                <span>🏳️ Mr. White (Senza parola)</span>
-                <div style="display:flex; align-items:center; gap:10px;">
-                    <button class="counter-btn" onclick="adjustRole('mrwhite', -1)">-</button>
-                    <span id="count-mrwhite" class="count-display">0</span>
-                    <button class="counter-btn" onclick="adjustRole('mrwhite', 1)">+</button>
-                </div>
+                <span>🏳️ Mr. White</span>
+                <div style="display:flex; gap:10px;"><button class="counter-btn" onclick="adjustRole('mrwhite', -1)">-</button><span id="count-mrwhite" style="font-size:20px; font-weight:bold; width:30px;">0</span><button class="counter-btn" onclick="adjustRole('mrwhite', 1)">+</button></div>
             </div>
         </div>
-
         <p>Giocatori: <span id="playerCount">0</span></p>
         <ul id="lobbyList" class="player-list" style="padding:0; list-style:none;"></ul>
-        
-        <div id="hostControls" class="hidden">
-            <button onclick="startGame()" class="btn-host">🚀 INIZIA PARTITA</button>
-        </div>
+        <div id="hostControls" class="hidden"><button onclick="startGame()" class="btn-host">🚀 INIZIA PARTITA</button></div>
         <p id="waitingMsg" class="hidden">In attesa dell'Host...</p>
     </div>
 
     <div id="view-game" class="card hidden">
         <div id="gameStatusHeader" class="status-bar st-alive">🟢 SEI VIVO</div>
-        
         <h2>Tocca a te!</h2>
-        <p>La tua parola segreta è:</p>
+        <p>Parola Segreta:</p>
         <div id="myWord" class="big-word">...</div>
-        
         <h3 id="roleTitle">...</h3>
         <p id="roleDesc" style="color:#aaa; font-size: 0.9rem;">...</p>
-        
-        <hr style="border-color:#333; margin: 20px 0;">
         <button onclick="goToVote()" class="btn-join">Vai al Voto</button>
     </div>
 
     <div id="view-vote" class="card hidden">
-        <div id="voteStatusHeader" class="status-bar st-alive">🟢 PUOI VOTARE</div>
-        <h2>Votazione</h2>
-        <p id="voteInstruction">Chi vuoi eliminare?</p>
-        
-        <div id="deadMessage" class="hidden" style="color: var(--danger); padding: 20px; border: 1px solid var(--danger); border-radius: 10px; margin-bottom: 20px;">
-            ☠️ SEI STATO ELIMINATO<br>
-            <span style="font-size:0.8rem; color:#ccc;">Non puoi votare, ma puoi guardare.</span>
-        </div>
-
+        <div id="voteStatusHeader" class="status-bar st-alive">🟢 VOTAZIONE</div>
+        <h2>Chi vuoi eliminare?</h2>
+        <div id="deadMessage" class="hidden" style="color:var(--danger); border:1px solid var(--danger); padding:10px; border-radius:10px; margin-bottom:10px;">☠️ SEI MORTO (Spettatore)</div>
         <div id="voteList"></div>
     </div>
 
     <div id="view-result" class="card hidden" style="padding-top:0;">
-        <div id="personalResultBanner" class="win-banner">
-            <h1 style="margin:0; font-size: 2.5rem;">VITTORIA</h1>
-            <p style="margin:5px 0 0 0;">Hai vinto!</p>
-        </div>
+        <div id="personalResultBanner" class="win-banner"><h1>VITTORIA</h1><p>...</p></div>
+        <h3 id="teamWinnerTitle" style="margin-top:20px;">...</h3>
+        <p id="resMsg" style="color:#ccc;">...</p>
         
-        <h3 id="teamWinnerTitle" style="margin-top:20px;">Vincono i Civili</h3>
-        <p id="resMsg" style="font-size: 1em; color:#ccc;">...</p>
-        
-        <div id="resDetails" style="text-align: left; background: #222; padding: 10px; border-radius: 8px; margin-top: 20px;"></div>
-        
-        <div id="mrWhiteChance" class="hidden" style="background: #330000; padding: 15px; border-radius: 8px; margin: 15px 0; border: 1px solid red;">
+        <div id="mrWhiteChance" class="hidden" style="background:#330000; padding:15px; border-radius:8px; border:1px solid red; margin-top:20px;">
             <h3 style="color:red; margin-top:0;">😱 Mr. White Preso!</h3>
-            <p>Se indovina la parola dei Civili, vince lui!</p>
+            <p>Se indovina la parola, ruba la vittoria!</p>
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                <button onclick="mrWhiteWin()" style="background:red; color:white; margin:0;">Ha Indovinato</button>
-                <button onclick="civiliansWinFinal()" style="background:#444; margin:0;">Ha Sbagliato</button>
+                <button onclick="finishGame('IMPOSTORS', 'Mr. White ha indovinato!')" style="background:red; color:white; margin:0;">Ha Indovinato</button>
+                <button onclick="mrWhiteFailedGuess()" style="background:#444; margin:0;">Ha Sbagliato</button>
             </div>
         </div>
 
-        <button onclick="resetGame()" class="btn-host">Torna alla Lobby</button>
+        <div id="resDetails" style="text-align:left; background:#222; padding:10px; border-radius:8px; margin-top:20px;"></div>
+        <button onclick="resetGame()" class="btn-host">Nuova Partita</button>
     </div>
 </div>
-
-<div id="toast" class="toast">Notifica</div>
+<div id="toast" class="toast">Msg</div>
 
 <script>
-    // --- CONFIGURAZIONE ---
-    const APP_ID = "mrwhite_ultimate_v3_"; 
-    const wordsDB = [
-        ["Pizza", "Pasta"], ["Cane", "Gatto"], ["Facebook", "Instagram"], 
-        ["Sole", "Luna"], ["Vino", "Birra"], ["Mare", "Piscina"],
-        ["Sci", "Snowboard"], ["Ketchup", "Maionese"], ["Apple", "Samsung"],
-        ["Tè", "Caffè"], ["Chitarra", "Basso"], ["Harry Potter", "Il Signore degli Anelli"],
-        ["Spiderman", "Batman"], ["Hotel", "Campeggio"], ["Aereo", "Elicottero"],
-        ["Inverno", "Autunno"], ["Doccia", "Bagno"], ["Whatsapp", "Telegram"],
-        ["Cioccolato", "Nutella"], ["Dottore", "Infermiere"]
-    ];
-
-    let peer, conn, myId, myName;
-    let isHost = false;
-    let connections = [];
+    const APP_ID = "mrwhite_fixed_v4_"; 
+    const wordsDB = [["Pizza", "Pasta"], ["Cane", "Gatto"], ["Sole", "Luna"], ["Vino", "Birra"], ["Mare", "Lago"], ["Apple", "Samsung"], ["Tè", "Caffè"], ["Calcio", "Basket"], ["Estate", "Inverno"], ["Ferrari", "Lamborghini"]];
     
+    let peer, conn, myId, myName, isHost = false, connections = [];
     let config = { undercover: 1, mrwhite: 0 };
+    let gameState = { players: [], phase: 'lobby', wordCiv: '', wordUnd: '' };
 
-    let gameState = {
-        players: [], 
-        phase: 'lobby',
-        secretWordCivil: '',
-        secretWordUnder: ''
-    };
-
-    /* --- NETWORKING (PEERJS) --- */
-
-    function getCleanRoomId() {
-        const val = document.getElementById('roomName').value;
-        if(!val) return null;
-        return APP_ID + val.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
-    }
-
+    function getCleanId() { const v=document.getElementById('roomName').value; return v ? APP_ID+v.trim().toLowerCase().replace(/[^a-z0-9]/g,'') : null; }
+    
+    // --- CONNESSIONE ---
     function initHost() {
-        const rName = document.getElementById('roomName').value;
-        const roomId = getCleanRoomId();
-        myName = document.getElementById('nickname').value;
-        
-        if(!myName || !roomId) return showToast("Dati mancanti");
-        document.getElementById('connStatus').innerText = "Creazione...";
-        
-        peer = new Peer(roomId);
-
-        peer.on('open', id => {
-            isHost = true;
-            myId = id;
-            addPlayer(id, myName);
-            showLobby(rName);
-            document.getElementById('hostConfig').classList.remove('hidden');
-            document.getElementById('hostControls').classList.remove('hidden');
-        });
-
-        peer.on('error', err => { alert("Stanza occupata o errore."); });
-
-        peer.on('connection', c => {
-            connections.push(c);
-            c.on('data', d => handleDataHost(d, c.peer));
-            c.on('close', () => removePlayer(c.peer));
-        });
+        const rid = getCleanId(); myName = document.getElementById('nickname').value;
+        if(!myName || !rid) return showToast("Mancano dati");
+        document.getElementById('connStatus').innerText = "Creo stanza...";
+        peer = new Peer(rid);
+        peer.on('open', id => { isHost=true; myId=id; addPlayer(id, myName); showLobby(); document.getElementById('hostConfig').classList.remove('hidden'); document.getElementById('hostControls').classList.remove('hidden'); });
+        peer.on('error', e => alert("Errore: Stanza occupata o rete."));
+        peer.on('connection', c => { connections.push(c); c.on('data', d => handleHost(d, c.peer)); c.on('close', ()=>removePlayer(c.peer)); });
     }
 
     function initJoin() {
-        const rName = document.getElementById('roomName').value;
-        const roomId = getCleanRoomId();
-        myName = document.getElementById('nickname').value;
-
-        if(!myName || !roomId) return showToast("Dati mancanti");
+        const rid = getCleanId(); myName = document.getElementById('nickname').value;
+        if(!myName || !rid) return showToast("Mancano dati");
         document.getElementById('connStatus').innerText = "Connessione...";
-
-        peer = new Peer(); 
-        peer.on('open', id => {
-            myId = id;
-            conn = peer.connect(roomId);
-            conn.on('open', () => {
-                conn.send({ type: 'JOIN', name: myName });
-                showLobby(rName);
-                document.getElementById('waitingMsg').classList.remove('hidden');
-            });
-            conn.on('data', d => handleDataClient(d));
-            conn.on('close', () => { alert("Host disconnesso"); location.reload(); });
+        peer = new Peer();
+        peer.on('open', id => { myId=id; conn = peer.connect(rid);
+            conn.on('open', () => { conn.send({t:'JOIN', n:myName}); showLobby(); document.getElementById('waitingMsg').classList.remove('hidden'); });
+            conn.on('data', d => handleClient(d));
+            conn.on('close', ()=> { alert("Host disconnesso"); location.reload(); });
         });
     }
 
-    /* --- GESTIONE DATI --- */
-
-    function handleDataHost(data, senderId) {
-        if(data.type === 'JOIN') { addPlayer(senderId, data.name); broadcastState(); }
-        if(data.type === 'VOTE') {
-            const p = gameState.players.find(x => x.id === data.target);
+    // --- LOGICA ---
+    function handleHost(d, sid) {
+        if(d.t==='JOIN') { addPlayer(sid, d.n); sync(); }
+        if(d.t==='VOTE') { 
+            const p = gameState.players.find(x=>x.id===d.target);
             if(p) p.votes++;
-            checkVotesEnd();
+            checkRoundEnd();
         }
     }
-
-    function handleDataClient(data) {
-        if(data.type === 'STATE') { gameState = data.state; renderLobbyList(); }
-        if(data.type === 'START') { gameState = data.state; renderGameScreen(); }
-        if(data.type === 'VOTE_START') { gameState = data.state; renderVoteScreen(); }
-        if(data.type === 'GAME_OVER') { renderResult(data.winnerTeam, data.msg, data.killedRole); }
+    function handleClient(d) {
+        if(d.t==='SYNC') { gameState=d.state; renderLobbyList(); }
+        if(d.t==='START') { gameState=d.state; renderGame(); }
+        if(d.t==='VOTE_OPEN') { gameState=d.state; renderVote(); }
+        if(d.t==='OVER') { renderResult(d.winTeam, d.msg, d.mwCaught); }
     }
 
-    /* --- LOGICA GIOCO --- */
-
-    function addPlayer(id, name) {
-        if(!gameState.players.find(p => p.id === id)){
-            gameState.players.push({ id, name, isAlive: true, votes: 0 });
-            renderLobbyList();
-        }
-    }
-    
-    function removePlayer(id) {
-        gameState.players = gameState.players.filter(p => p.id !== id);
-        broadcastState();
-        renderLobbyList();
-    }
-
-    function adjustRole(role, delta) {
-        config[role] += delta;
-        if(config[role] < 0) config[role] = 0;
-        document.getElementById('count-' + role).innerText = config[role];
-    }
+    function addPlayer(id, name) { if(!gameState.players.find(p=>p.id===id)) gameState.players.push({id, name, alive:true, votes:0}); sync(); }
+    function removePlayer(id) { gameState.players = gameState.players.filter(p=>p.id!==id); sync(); renderLobbyList(); }
+    function sync() { if(isHost) connections.forEach(c=>c.send({t:'SYNC', state:gameState})); renderLobbyList(); }
+    function adjustRole(r, d) { config[r] = Math.max(0, config[r]+d); document.getElementById('count-'+r).innerText = config[r]; }
 
     function startGame() {
-        const total = gameState.players.length;
-        const impostors = config.undercover + config.mrwhite;
+        if(gameState.players.length < 3) return showToast("Minimo 3 giocatori");
+        const totBad = config.undercover + config.mrwhite;
+        if(totBad === 0 || totBad >= gameState.players.length) return showToast("Configurazione ruoli non valida");
 
-        if(total < 3) return showToast("Minimo 3 giocatori!");
-        if(impostors >= total) return showToast("Troppi impostori!");
-        if(impostors === 0) return showToast("Metti almeno un nemico!");
+        const pair = wordsDB[Math.floor(Math.random()*wordsDB.length)];
+        gameState.wordCiv=pair[0]; gameState.wordUnd=pair[1];
 
-        const pair = wordsDB[Math.floor(Math.random() * wordsDB.length)];
-        gameState.secretWordCivil = pair[0];
-        gameState.secretWordUnder = pair[1];
+        let deck = Array(config.undercover).fill('undercover').concat(Array(config.mrwhite).fill('mrwhite'));
+        while(deck.length < gameState.players.length) deck.push('civil');
+        deck = deck.sort(() => Math.random() - 0.5);
 
-        let deck = [];
-        for(let i=0; i<config.undercover; i++) deck.push('undercover');
-        for(let i=0; i<config.mrwhite; i++) deck.push('mrwhite');
-        while(deck.length < total) deck.push('civil');
-        
-        // Shuffle
-        for (let i = deck.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [deck[i], deck[j]] = [deck[j], deck[i]];
-        }
-
-        gameState.players.forEach((p, idx) => {
-            p.role = deck[idx];
-            p.votes = 0;
-            p.isAlive = true;
-            p.word = (p.role === 'civil') ? gameState.secretWordCivil : (p.role === 'undercover' ? gameState.secretWordUnder : "???");
+        gameState.players.forEach((p, i) => {
+            p.role = deck[i]; p.alive=true; p.votes=0;
+            p.word = (p.role==='civil') ? gameState.wordCiv : (p.role==='undercover' ? gameState.wordUnd : "???");
         });
 
-        renderGameScreen();
-        broadcast({ type: 'START', state: gameState });
+        renderGame();
+        connections.forEach(c => c.send({t:'START', state:gameState}));
     }
 
-    function checkVotesEnd() {
-        const living = gameState.players.filter(p => p.isAlive).length;
-        const totalVotes = gameState.players.reduce((sum, p) => sum + p.votes, 0);
-
-        if(totalVotes >= living) evaluateRound();
+    function checkRoundEnd() {
+        const living = gameState.players.filter(p=>p.alive).length;
+        const votes = gameState.players.reduce((a,b)=>a+b.votes, 0);
+        if(votes >= living) evaluateVotes();
     }
 
-    function evaluateRound() {
-        let maxVotes = 0, candidates = [];
-        
-        gameState.players.forEach(p => {
-            if(p.votes > maxVotes) { maxVotes = p.votes; candidates = [p]; } 
-            else if (p.votes === maxVotes) candidates.push(p);
-        });
+    function evaluateVotes() {
+        let max=0, candidates=[];
+        gameState.players.forEach(p => { if(p.votes>max){max=p.votes; candidates=[p];} else if(p.votes===max) candidates.push(p); });
+        gameState.players.forEach(p=>p.votes=0); // Reset voti
 
-        gameState.players.forEach(p => p.votes = 0); // Reset
-
-        if(candidates.length > 1 || maxVotes === 0) {
-            broadcast({ type: 'VOTE_START', state: gameState });
-            renderVoteScreen();
-            return showToast("Pareggio! Si rivota.");
-        }
-
-        const eliminated = candidates[0];
-        eliminated.isAlive = false;
-
-        // CHECK VITTORIA
-        const aliveImpostors = gameState.players.filter(p => p.isAlive && p.role !== 'civil').length;
-        const aliveCivils = gameState.players.filter(p => p.isAlive && p.role === 'civil').length;
-
-        if(eliminated.role === 'mrwhite') {
-             broadcastResult('PENDING', `Mr. White (${eliminated.name}) preso! Deve indovinare.`, 'mrwhite_caught');
-             return;
-        }
-        if(aliveImpostors === 0) {
-            broadcastResult('CIVILS', "Tutti i nemici eliminati!");
-            return;
-        }
-        if(aliveImpostors >= aliveCivils || (aliveImpostors + aliveCivils) <= 2) {
-            broadcastResult('IMPOSTORS', "Gli intrusi hanno vinto!");
+        if(candidates.length !== 1) { // Pareggio
+            connections.forEach(c => c.send({t:'VOTE_OPEN', state:gameState}));
+            renderVote(); showToast("Pareggio! Si rivota.");
             return;
         }
 
-        broadcast({ type: 'VOTE_START', state: gameState });
-        renderVoteScreen(); 
-        showToast(`${eliminated.name} eliminato!`);
-    }
+        const elim = candidates[0];
+        elim.alive = false;
 
-    function mrWhiteWin() { broadcastResult("IMPOSTORS", "Mr. White ha indovinato!"); }
-    function civiliansWinFinal() {
-        const aliveImpostors = gameState.players.filter(p => p.isAlive && p.role !== 'civil').length;
-        if(aliveImpostors > 0) {
-             broadcast({ type: 'VOTE_START', state: gameState });
-             renderVoteScreen();
-        } else {
-             broadcastResult("CIVILS", "Mr. White ha sbagliato!");
+        // CHECK SPECIFICO: Se è Mr White, diamo la chance
+        if(elim.role === 'mrwhite') {
+            // Non finiamo ancora il gioco, l'host decide
+            renderResult('PENDING', `Mr. White (${elim.name}) preso! Deve indovinare.`, true);
+            connections.forEach(c => c.send({t:'OVER', winTeam:'PENDING', msg:`Mr. White (${elim.name}) preso! Deve indovinare.`}));
+            return;
         }
+
+        checkWinCondition(`${elim.name} eliminato (${elim.role})`);
     }
 
-    /* --- UI --- */
-
-    function switchView(id) {
-        document.querySelectorAll('.card').forEach(el => el.classList.add('hidden'));
-        document.getElementById(id).classList.remove('hidden');
+    // Funzione chiamata se Mr White sbaglia parola
+    function mrWhiteFailedGuess() {
+        checkWinCondition("Mr. White ha sbagliato la parola!");
     }
 
-    function showLobby(roomName) {
-        switchView('view-lobby');
-        document.getElementById('lobbyRoomName').innerText = roomName;
-        renderLobbyList();
+    function checkWinCondition(lastActionMsg) {
+        const aliveBad = gameState.players.filter(p => p.alive && p.role!=='civil').length;
+        const aliveGood = gameState.players.filter(p => p.alive && p.role==='civil').length;
+        const totalAlive = aliveBad + aliveGood;
+
+        // 1. Tutti i cattivi morti -> Vincono Civili
+        if(aliveBad === 0) return finishGame('CIVILS', "Tutti gli intrusi eliminati!");
+
+        // 2. Parità numerica o solo 2 giocatori rimasti -> Vincono Impostori
+        // (Se siamo 1vs1 o 2vs2, i civili non possono più vincere il voto)
+        if(aliveBad >= aliveGood || totalAlive <= 2) {
+            return finishGame('IMPOSTORS', "Gli intrusi hanno la maggioranza (o stallo 1vs1)!");
+        }
+
+        // 3. Il gioco continua
+        connections.forEach(c => c.send({t:'VOTE_OPEN', state:gameState}));
+        renderVote(); showToast(lastActionMsg);
     }
 
+    function finishGame(team, msg) {
+        renderResult(team, msg, false);
+        connections.forEach(c => c.send({t:'OVER', winTeam:team, msg:msg}));
+    }
+
+    // --- UI ---
+    function switchView(id) { document.querySelectorAll('.card').forEach(e=>e.classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); }
+    function showLobby() { switchView('view-lobby'); document.getElementById('lobbyRoomName').innerText = document.getElementById('roomName').value; renderLobbyList(); }
+    
     function renderLobbyList() {
-        const list = document.getElementById('lobbyList');
-        list.innerHTML = '';
+        const l = document.getElementById('lobbyList'); l.innerHTML='';
         gameState.players.forEach(p => {
-            const li = document.createElement('li');
-            li.innerHTML = `<span>${p.name} ${!p.isAlive ? '💀' : ''}</span>`;
-            if(p.id === myId) li.classList.add('me');
-            if(!p.isAlive) li.classList.add('dead-player');
-            list.appendChild(li);
+            l.innerHTML += `<li class="${p.id===myId?'me':''} ${!p.alive?'dead-player':''}"><span>${p.name} ${!p.alive?'💀':''}</span></li>`;
         });
-        document.getElementById('playerCount').innerText = gameState.players.length;
+        document.getElementById('playerCount').innerText=gameState.players.length;
     }
 
-    function renderGameScreen() {
+    function renderGame() {
         switchView('view-game');
-        const me = gameState.players.find(p => p.id === myId);
-        
-        // Status Bar
-        const sb = document.getElementById('gameStatusHeader');
-        if(me.isAlive) {
-            sb.innerText = "🟢 SEI VIVO";
-            sb.className = "status-bar st-alive";
-        } else {
-            sb.innerText = "🔴 SEI ELIMINATO";
-            sb.className = "status-bar st-dead";
-        }
-
+        const me = gameState.players.find(p=>p.id===myId);
         document.getElementById('myWord').innerText = me.word;
+        const t = document.getElementById('roleTitle'); const d = document.getElementById('roleDesc');
+        const sb = document.getElementById('gameStatusHeader');
         
-        const rt = document.getElementById('roleTitle');
-        const rd = document.getElementById('roleDesc');
+        if(me.alive) { sb.innerText="🟢 SEI VIVO"; sb.className="status-bar st-alive"; } 
+        else { sb.innerText="🔴 ELIMINATO"; sb.className="status-bar st-dead"; }
 
-        if(me.role === 'civil') {
-            rt.innerText = "CIVILE"; rt.className = "accent";
-            rd.innerText = "Trova l'intruso tra voi.";
-        } else if (me.role === 'undercover') {
-            rt.innerText = "UNDERCOVER"; rt.className = "under-role";
-            rd.innerText = "Hai una parola diversa. Mimetizzati.";
-        } else {
-            rt.innerText = "MR. WHITE"; rt.className = "white-role";
-            rd.innerText = "Non hai parola. Ascolta e fingi.";
-        }
+        if(me.role==='civil') { t.innerText="CIVILE"; t.className="accent"; d.innerText="Trova l'intruso."; }
+        else if(me.role==='undercover') { t.innerText="UNDERCOVER"; t.className="under-role"; d.innerText="Confonditi."; }
+        else { t.innerText="MR. WHITE"; t.className="white-role"; d.innerText="Fingi di sapere la parola."; }
     }
 
     function goToVote() {
-        if(isHost) {
-            broadcast({ type: 'VOTE_START', state: gameState });
-            renderVoteScreen();
-        } else showToast("Aspetta l'Host");
+        if(isHost) { connections.forEach(c => c.send({t:'VOTE_OPEN', state:gameState})); renderVote(); }
+        else showToast("Aspetta l'Host");
     }
 
-    function renderVoteScreen() {
+    function renderVote() {
         switchView('view-vote');
-        const list = document.getElementById('voteList');
-        const deadMsg = document.getElementById('deadMessage');
-        const statusHeader = document.getElementById('voteStatusHeader');
-        list.innerHTML = '';
-
-        const me = gameState.players.find(p => p.id === myId);
-
-        if(!me.isAlive) {
-            // SE SEI MORTO
-            statusHeader.innerText = "🔴 SEI ELIMINATO";
-            statusHeader.className = "status-bar st-dead";
-            deadMsg.classList.remove('hidden');
-            list.classList.add('hidden'); // Nascondi bottoni voto
+        const list = document.getElementById('voteList'); list.innerHTML='';
+        const me = gameState.players.find(p=>p.id===myId);
+        
+        if(!me.alive) {
+            document.getElementById('voteStatusHeader').className="status-bar st-dead";
+            document.getElementById('voteStatusHeader').innerText="🔴 SPETTATORE";
+            document.getElementById('deadMessage').classList.remove('hidden');
         } else {
-            // SE SEI VIVO
-            statusHeader.innerText = "🟢 TOCCA A TE";
-            statusHeader.className = "status-bar st-alive";
-            deadMsg.classList.add('hidden');
-            list.classList.remove('hidden');
-
+            document.getElementById('voteStatusHeader').className="status-bar st-alive";
+            document.getElementById('voteStatusHeader').innerText="🟢 VOTAZIONE";
+            document.getElementById('deadMessage').classList.add('hidden');
             gameState.players.forEach(p => {
-                if(p.isAlive && p.id !== myId) {
-                    const btn = document.createElement('button');
-                    btn.className = 'btn-vote';
-                    btn.innerHTML = `<span>${p.name}</span> <span>☠️</span>`;
-                    btn.onclick = () => {
-                        list.innerHTML = '<p style="text-align:center; color:#888;">Voto inviato...</p>';
-                        if(isHost) {
-                            p.votes++;
-                            checkVotesEnd();
-                        } else conn.send({ type: 'VOTE', target: p.id });
+                if(p.alive && p.id!==myId) {
+                    const b = document.createElement('button'); b.className='btn-vote';
+                    b.innerHTML=`<span>${p.name}</span> <span>☠️</span>`;
+                    b.onclick = () => {
+                        list.innerHTML='<p style="color:#888;">Voto inviato...</p>';
+                        if(isHost) { p.votes++; checkRoundEnd(); } else conn.send({t:'VOTE', target:p.id});
                     };
-                    list.appendChild(btn);
+                    list.appendChild(b);
                 }
             });
         }
     }
 
-    function renderResult(winnerTeam, msg, killedRole) {
+    function renderResult(winTeam, msg, mwCaught) {
         switchView('view-result');
-        const me = gameState.players.find(p => p.id === myId);
-        
-        // Logica Messaggio Personale
+        const me = gameState.players.find(p=>p.id===myId);
         const banner = document.getElementById('personalResultBanner');
-        const h1 = banner.querySelector('h1');
-        const p = banner.querySelector('p');
         
-        let iWon = false;
-        const iAmBad = (me.role === 'undercover' || me.role === 'mrwhite');
-
-        if(winnerTeam === 'PENDING') {
-            banner.className = "win-banner"; // Neutro
-            banner.style.background = "#555";
-            banner.style.color = "white";
-            h1.innerText = "ATTESA";
-            p.innerText = "Mr. White sta provando a indovinare...";
-        } else {
-            if(winnerTeam === 'CIVILS' && !iAmBad) iWon = true;
-            else if(winnerTeam === 'IMPOSTORS' && iAmBad) iWon = true;
-            
-            if(iWon) {
-                banner.className = "win-banner";
-                h1.innerText = "HAI VINTO! 🏆";
-                p.innerText = "La tua squadra ha trionfato.";
-            } else {
-                banner.className = "lose-banner";
-                h1.innerText = "HAI PERSO 💀";
-                p.innerText = "Ritenta la prossima volta.";
-            }
-        }
-
-        // Dettagli Generali
-        document.getElementById('teamWinnerTitle').innerText = 
-            winnerTeam === 'PENDING' ? "..." : (winnerTeam === 'CIVILS' ? "Vincono i Civili" : "Vincono gli Impostori");
         document.getElementById('resMsg').innerText = msg;
+        document.getElementById('mrWhiteChance').classList.add('hidden');
 
-        // Lista Ruoli
-        const det = document.getElementById('resDetails');
-        det.innerHTML = '<h4>Ruoli Rivelati:</h4>';
-        gameState.players.forEach(p => {
-            let roleName = p.role === 'civil' ? 'Civile' : (p.role === 'undercover' ? 'Undercover' : 'Mr. White');
-            let colorClass = p.role === 'civil' ? 'accent' : (p.role === 'undercover' ? 'under-role' : 'white-role');
-            det.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:5px; border-bottom:1px solid #333;">
-                <span class="${!p.isAlive ? 'dead' : ''}">${p.name}</span>
-                <span class="${colorClass}">${roleName}</span>
-            </div>`;
-        });
-
-        // Chance Mr White (Solo Host)
-        const mwBox = document.getElementById('mrWhiteChance');
-        if(isHost && killedRole === 'mrwhite_caught') mwBox.classList.remove('hidden');
-        else mwBox.classList.add('hidden');
+        if(winTeam === 'PENDING') {
+            banner.style.background="#555"; banner.querySelector('h1').innerText="ATTESA"; banner.querySelector('p').innerText="Fase finale...";
+            document.getElementById('teamWinnerTitle').innerText = "Mr. White Preso...";
+            if(isHost && mwCaught) document.getElementById('mrWhiteChance').classList.remove('hidden');
+        } else {
+            const iAmBad = (me.role!=='civil');
+            const iWon = (winTeam==='CIVILS' && !iAmBad) || (winTeam==='IMPOSTORS' && iAmBad);
+            
+            banner.className = iWon ? "win-banner" : "lose-banner";
+            banner.querySelector('h1').innerText = iWon ? "HAI VINTO! 🏆" : "HAI PERSO 💀";
+            banner.querySelector('p').innerText = iWon ? "Ottimo lavoro!" : "Peccato...";
+            document.getElementById('teamWinnerTitle').innerText = (winTeam==='CIVILS') ? "Vincono i Civili" : "Vincono gli Impostori";
+            
+            // Lista Ruoli
+            const d = document.getElementById('resDetails'); d.innerHTML='<h4>Ruoli:</h4>';
+            gameState.players.forEach(p => {
+                let c = p.role==='civil'?'accent':(p.role==='undercover'?'under-role':'white-role');
+                d.innerHTML += `<div style="display:flex; justify-content:space-between; border-bottom:1px solid #333; margin-bottom:5px;"><span>${p.name}</span><span class="${c}">${p.role}</span></div>`;
+            });
+        }
     }
 
-    function broadcast(data) { connections.forEach(c => c.send(data)); }
-    function broadcastState() { broadcast({ type: 'STATE', state: gameState }); }
-    function broadcastResult(winnerTeam, msg, killedRole=null) {
-        renderResult(winnerTeam, msg, killedRole);
-        broadcast({ type: 'GAME_OVER', winnerTeam, msg, killedRole });
-    }
-    function showToast(msg) {
-        const t = document.getElementById('toast');
-        t.innerText = msg;
-        t.style.opacity = 1;
-        setTimeout(()=>t.style.opacity=0, 3000);
-    }
-    function resetGame() {
-        gameState.phase = 'lobby';
-        gameState.players.forEach(p => { p.isAlive = true; p.votes = 0; p.role = null; });
-        showLobby(document.getElementById('roomName').value);
-        broadcastState();
-    }
+    function resetGame() { gameState.phase='lobby'; gameState.players.forEach(p=>{p.alive=true; p.votes=0; p.role=null;}); showLobby(); sync(); }
+    function showToast(m) { const t=document.getElementById('toast'); t.innerText=m; t.style.opacity=1; setTimeout(()=>t.style.opacity=0, 3000); }
 </script>
 </body>
 </html>
